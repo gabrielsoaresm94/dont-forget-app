@@ -33,12 +33,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _controller = TextEditingController();
+  final double buttonSize = 64;
 
   void _sendText() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    // ação de envio
     debugPrint("Enviado: $text");
     _controller.clear();
   }
@@ -54,11 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               Text(
                 'NÃO POSSO\nESQUECER DE ...',
-                textAlign: TextAlign.left,
                 style: GoogleFonts.questrial(
                   color: const Color(0xFFDEDEDE),
-                  fontSize: 46,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 56,
+                  fontWeight: FontWeight.w900,
                   letterSpacing: 1.5,
                 ),
               ),
@@ -68,7 +67,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: TextField(
                     controller: _controller,
                     maxLines: null,
-                    keyboardType: TextInputType.multiline,
                     textAlign: TextAlign.left,
                     cursorColor: const Color(0xFFDEDEDE),
                     cursorWidth: 4,
@@ -92,10 +90,11 @@ class _MyHomePageState extends State<MyHomePage> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: InkWell(
-                  onTap: _sendText,
+                  onTap: () => debugPrint("Enviar task"),
                   borderRadius: BorderRadius.zero,
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    width: buttonSize,
+                    height: buttonSize,
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: const Color(0xFFDEDEDE),
@@ -103,12 +102,53 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     child: const Icon(
-                      Icons.north_east_rounded, // mais "utilitário"
+                      Icons.north_east_rounded,
                       size: 28,
                       color: Color(0xFFDEDEDE),
                     ),
                   ),
                 ),
+              ),
+              Row(
+                children: [
+                  SizedBox(width: buttonSize),
+                  InkWell(
+                    onTap: () => debugPrint("Ir para Home"),
+                    child: Container(
+                      width: buttonSize,
+                      height: buttonSize,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color(0xFFDEDEDE),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.home_rounded,
+                        size: 28,
+                        color: Color(0xFFDEDEDE),
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => debugPrint("Ir para lista de tasks"),
+                    child: Container(
+                      width: buttonSize,
+                      height: buttonSize,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color(0xFFDEDEDE),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.list_rounded,
+                        size: 28,
+                        color: Color(0xFFDEDEDE),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

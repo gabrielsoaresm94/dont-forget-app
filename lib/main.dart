@@ -34,6 +34,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _controller = TextEditingController();
   final double buttonSize = 64;
+  String _selectedCategory = "TRABALHO";
 
   void _sendText() {
     final text = _controller.text.trim();
@@ -82,11 +83,136 @@ class _MyHomePageState extends State<MyHomePage> {
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
+                      labelText: 'MINHA TASK',
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFDEDEDE), width: 1),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    dropdownColor: const Color(0xFF131313),
+                    icon: const Icon(
+                      Icons.arrow_drop_down,
+                      color: Color(0xFFDEDEDE),
+                    ),
+                    value: _selectedCategory,
+                    items: ['TRABALHO', 'PESSOAL', 'ESTUDOS', 'OUTROS']
+                        .map(
+                          (cat) => DropdownMenuItem(
+                            value: cat,
+                            child: Text(
+                              cat,
+                              style: GoogleFonts.questrial(
+                                color: const Color(0xFFDEDEDE),
+                                fontSize: 20,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() => _selectedCategory = value ?? "");
+                    },
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () async {
+                        final selectedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2100),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                dialogBackgroundColor: const Color(0xFF131313),
+                                colorScheme: const ColorScheme.dark(
+                                  primary: Color(0xFFDEDEDE),
+                                  onSurface: Color(0xFFDEDEDE),
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                      },
+                      child: Container(
+                        height: 56,
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color(0xFFDEDEDE),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          'DATA',
+                          style: GoogleFonts.questrial(
+                            color: const Color(0xFFDEDEDE),
+                            fontSize: 20,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () async {
+                        final selectedTime = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                dialogBackgroundColor: const Color(0xFF131313),
+                                colorScheme: const ColorScheme.dark(
+                                  primary: Color(0xFFDEDEDE),
+                                  onSurface: Color(0xFFDEDEDE),
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                      },
+                      child: Container(
+                        height: 56,
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color(0xFFDEDEDE),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          'HORA',
+                          style: GoogleFonts.questrial(
+                            color: const Color(0xFFDEDEDE),
+                            fontSize: 20,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               Align(
                 alignment: Alignment.centerLeft,
                 child: InkWell(

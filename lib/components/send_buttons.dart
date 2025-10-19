@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class SendButtons extends StatelessWidget {
-  final VoidCallback onSend;
+  final VoidCallback? onSend;
   final VoidCallback onHome;
   final VoidCallback onList;
   final double buttonSize;
 
   const SendButtons({
     super.key,
-    required this.onSend,
+    this.onSend,
     required this.onHome,
     required this.onList,
     this.buttonSize = 64,
@@ -18,25 +18,26 @@ class SendButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: InkWell(
-            onTap: onSend,
-            borderRadius: BorderRadius.zero,
-            child: Container(
-              width: buttonSize,
-              height: buttonSize,
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFFDEDEDE)),
-              ),
-              child: const Icon(
-                Icons.north_east_rounded,
-                size: 28,
-                color: Color(0xFFDEDEDE),
+        if (onSend != null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: InkWell(
+              onTap: onSend,
+              borderRadius: BorderRadius.zero,
+              child: Container(
+                width: buttonSize,
+                height: buttonSize,
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFDEDEDE)),
+                ),
+                child: const Icon(
+                  Icons.north_east_rounded,
+                  size: 28,
+                  color: Color(0xFFDEDEDE),
+                ),
               ),
             ),
           ),
-        ),
         Row(
           children: [
             SizedBox(width: buttonSize),

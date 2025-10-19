@@ -1,3 +1,4 @@
+import 'package:dont_forget_app/components/send_buttons.dart';
 import 'package:flutter/material.dart';
 import '../utils/app_theme.dart';
 
@@ -21,18 +22,7 @@ class TasksScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: AppTheme.textColor,
-                    ),
-                  ),
-                  Text('TASKS', style: AppTheme.headingMedium),
-                ],
-              ),
+              Row(children: [Text('TASKS', style: AppTheme.headingMedium)]),
               const SizedBox(height: 24),
               Expanded(
                 child: ListView.builder(
@@ -52,6 +42,10 @@ class TasksScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+              ),
+              SendButtons(
+                onHome: () => Navigator.pushNamed(context, '/'),
+                onList: () => Navigator.pushNamed(context, '/tasks'),
               ),
             ],
           ),

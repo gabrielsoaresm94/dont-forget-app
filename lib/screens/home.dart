@@ -52,27 +52,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-
-              /// Campo de texto principal
               TaskInput(controller: _controller),
-
               const SizedBox(height: 20),
-
-              /// Dropdown de categoria
               CategoryDropdown(
                 selectedCategory: _selectedCategory,
                 onChanged: (value) => setState(() => _selectedCategory = value),
               ),
-
-              /// Seletores de data e hora
               DateTimePicker(
                 selectedDate: _selectedDate,
                 selectedTime: _selectedTime,
                 onDateSelected: (date) => setState(() => _selectedDate = date),
                 onTimeSelected: (time) => setState(() => _selectedTime = time),
               ),
-
-              /// Botões de envio e navegação
               SendButtons(
                 onSend: _sendTask,
                 onHome: () => Navigator.pushNamed(context, '/'),

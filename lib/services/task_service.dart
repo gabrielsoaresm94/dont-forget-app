@@ -43,10 +43,10 @@ class TaskService {
     return TaskModel.fromJson(res.data);
   }
 
-  Future<TaskModel> updateTask(TaskModel updated) async {
+  Future<TaskModel> updateTask(TaskModel task) async {
     final res = await _dio.put(
-      '/tasks/v1/update/${updated.id}',
-      data: updated.toJson(),
+      '/tasks/v1/update/${task.id}',
+      data: task.toJson(),
     );
     return TaskModel.fromJson(res.data);
   }

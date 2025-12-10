@@ -80,13 +80,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 20),
 
               // Categories vindo da API
-              categories.when(
-                data: (_) => CategoryAutocompleteDropdown(
-                  selectedCategoryId: _selectedCategoryId,
-                  onChanged: (id) => setState(() => _selectedCategoryId = id),
-                ),
-                loading: () => const CircularProgressIndicator(),
-                error: (_, __) => const Text("Erro ao carregar categorias"),
+              CategoryAutocompleteDropdown(
+                selectedCategoryId: _selectedCategoryId,
+                onChanged: (id) => setState(() => _selectedCategoryId = id),
               ),
 
               DateTimePicker(

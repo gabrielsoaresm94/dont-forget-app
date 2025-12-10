@@ -31,7 +31,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    // Agora podemos montar a data final corretamente
     final fullDate = DateTime(
       _selectedDate!.year,
       _selectedDate!.month,
@@ -79,7 +78,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               TaskInput(controller: _controller),
               const SizedBox(height: 20),
 
-              // Categories vindo da API
               CategoryAutocompleteDropdown(
                 selectedCategoryId: _selectedCategoryId,
                 onChanged: (id) => setState(() => _selectedCategoryId = id),

@@ -11,12 +11,36 @@ final taskProvider = StateNotifierProvider<TaskNotifier, List<TaskModel>>((
 class TaskNotifier extends StateNotifier<List<TaskModel>> {
   final TaskService service;
 
-  TaskNotifier(this.service) : super([]);
+  TaskNotifier(this.service)
+    : super([
+        TaskModel(
+          id: 1,
+          description: 'Ligar para o fornecedor',
+          expiredAt: DateTime.now().add(const Duration(hours: 2)),
+          categoryId: 1,
+        ),
+        TaskModel(
+          id: 2,
+          description: 'Enviar relatório mensal',
+          expiredAt: DateTime.now().add(const Duration(days: 1)),
+          categoryId: 1,
+        ),
+        TaskModel(
+          id: 3,
+          description: 'Comprar tinta branca',
+          expiredAt: DateTime.now().add(const Duration(days: 2)),
+          categoryId: 1,
+        ),
+        TaskModel(
+          id: 4,
+          description: 'Organizar arquivos de 2024',
+          expiredAt: DateTime.now().add(const Duration(days: 3)),
+          categoryId: 1,
+        ),
+      ]);
 
-  /// Carrega uma task pelo ID e adiciona/atualiza no estado
   Future<void> loadTask(int id) async {
     final task = await service.getTask(id);
-
     state = [
       for (final t in state)
         if (t.id == id) task else t,
@@ -24,7 +48,6 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
     ];
   }
 
-  /// Adiciona uma nova task criada via API
   Future<void> addTask({
     required String description,
     required int categoryId,
@@ -36,18 +59,13 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
       expiredAt: date,
       categoryId: categoryId,
     );
-
     final createdTask = await service.createTask(newTask);
-
     state = [...state, createdTask];
   }
 
-  /// Atualiza uma task existente
   Future<void> updateTask(TaskModel updated) async {
     final serverUpdated = await service.updateTask(updated);
-
     bool exists = state.any((t) => t.id == updated.id);
-
     state = [
       for (final t in state)
         if (t.id == updated.id) serverUpdated else t,
@@ -55,7 +73,6 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
     ];
   }
 
-  /// Remove uma task do backend e do estado
   Future<void> deleteTask(int id) async {
     await service.deleteTask(id);
     state = state.where((t) => t.id != id).toList();

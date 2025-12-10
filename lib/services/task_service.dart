@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-// import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/task_model.dart';
@@ -16,22 +14,6 @@ class TaskService {
       },
     ),
   );
-
-  Future<void> sendTask({
-    required String description,
-    required String category,
-    DateTime? date,
-    TimeOfDay? time,
-  }) async {
-    print("Enviando Task:");
-    print("Descrição: $description");
-    print("Categoria: $category");
-    print("Data: ${date?.toIso8601String() ?? 'não definida'}");
-    final formattedTime = time != null
-        ? "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}"
-        : 'não definida';
-    print("Hora: $formattedTime");
-  }
 
   Future<TaskModel> getTask(int id) async {
     final res = await _dio.get('/tasks/v1/get/$id');

@@ -16,41 +16,69 @@ class TaskDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
-  late TextEditingController _controller;
-  late int _categoryId;
+  late final TextEditingController _controller;
+
+  ProviderSubscription<List<TaskModel>>? _taskSub;
+
+  bool _initialized = false;
+  bool _syncedFromProvider = false;
+
+  int? _categoryId;
   DateTime? _date;
   TimeOfDay? _time;
 
   late TaskModel task;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    _taskSub = ref.listenManual<List<TaskModel>>(taskProvider, (prev, next) {
+      if (!_initialized) return;
 
-    // recebe a task enviada pela rota
-    task = ModalRoute.of(context)!.settings.arguments as TaskModel;
+      final exists = next.any((t) => t.id == task.id);
+      if (!exists) return;
 
-    // solicita nova versão ao servidor
-    ref.read(taskProvider.notifier).loadTask(task.id);
+      final t = next.firstWhere((x) => x.id == task.id);
 
-    // pega versão atualizada (ou a original)
-    final updated = ref
-        .read(taskProvider)
-        .firstWhere((t) => t.id == task.id, orElse: () => task);
+      if (_syncedFromProvider) return;
+      _syncedFromProvider = true;
 
-    _controller = TextEditingController(text: updated.description);
-    _categoryId = updated.categoryId;
-
-    _date = updated.expiredAt;
-    _time = TimeOfDay(
-      hour: updated.expiredAt.hour,
-      minute: updated.expiredAt.minute,
-    );
+      if (!mounted) return;
+      setState(() {
+        _controller.text = t.description;
+        _categoryId = t.categoryId;
+        _date = t.expiredAt;
+        _time = TimeOfDay(hour: t.expiredAt.hour, minute: t.expiredAt.minute);
+      });
+    });
   }
 
-  /// Atualiza task
-  void _updateTask() async {
-    if (_date == null || _time == null) return;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
+
+    task = ModalRoute.of(context)!.settings.arguments as TaskModel;
+
+    _controller.text = task.description;
+    _categoryId = task.categoryId;
+    _date = task.expiredAt;
+    _time = TimeOfDay(hour: task.expiredAt.hour, minute: task.expiredAt.minute);
+
+    Future.microtask(() => ref.read(taskProvider.notifier).loadTask(task.id));
+  }
+
+  @override
+  void dispose() {
+    _taskSub?.close();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateTask() async {
+    if (_date == null || _time == null || _categoryId == null) return;
 
     final updatedExpiredAt = DateTime(
       _date!.year,
@@ -63,21 +91,31 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
     final updatedTask = task.copyWith(
       description: _controller.text.trim(),
       expiredAt: updatedExpiredAt,
-      categoryId: _categoryId,
+      categoryId: _categoryId!,
     );
 
     await ref.read(taskProvider.notifier).updateTask(updatedTask);
-    Navigator.pushNamed(context, '/tasks');
+
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/tasks');
   }
 
-  /// Remove task
-  void _deleteTask() async {
+  Future<void> _deleteTask() async {
     await ref.read(taskProvider.notifier).deleteTask(task.id);
-    Navigator.pushNamed(context, '/');
+
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/');
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF131313),
+        body: SafeArea(child: Center(child: CircularProgressIndicator())),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF131313),
       body: SafeArea(
@@ -89,15 +127,11 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               TaskInput(controller: _controller),
               const SizedBox(height: 20),
 
-              /// 🔥 Novo dropdown corrigido
               CategoryAutocompleteDropdown(
                 selectedCategoryId: _categoryId,
-                onChanged: (value) {
-                  setState(() => _categoryId = value!);
-                },
+                onChanged: (value) => setState(() => _categoryId = value),
               ),
 
-              /// DateTimePicker
               DateTimePicker(
                 selectedDate: _date,
                 selectedTime: _time,
@@ -132,8 +166,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               const Spacer(),
 
               SendButtons(
-                onHome: () => Navigator.pushNamed(context, '/'),
-                onList: () => Navigator.pushNamed(context, '/tasks'),
+                onHome: () => Navigator.pushReplacementNamed(context, '/'),
+                onList: () => Navigator.pushReplacementNamed(context, '/tasks'),
               ),
             ],
           ),

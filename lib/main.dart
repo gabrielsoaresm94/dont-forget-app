@@ -2,7 +2,6 @@ import 'package:dont_forget_app/screens/task.dart';
 import 'package:flutter/material.dart';
 import 'screens/home.dart';
 import 'screens/tasks.dart';
-import 'utils/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {

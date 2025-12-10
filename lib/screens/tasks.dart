@@ -1,24 +1,17 @@
 import 'package:dont_forget_app/components/send_buttons.dart';
+import 'package:dont_forget_app/models/task_model.dart';
+import 'package:dont_forget_app/providers/task_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/app_theme.dart';
 
-class TasksScreen extends StatefulWidget {
+class TasksScreen extends ConsumerWidget {
   const TasksScreen({super.key});
 
   @override
-  State<TasksScreen> createState() => _TasksScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tasks = ref.watch(taskProvider);
 
-class _TasksScreenState extends State<TasksScreen> {
-  List<String> tasks = [
-    'Ligar para o fornecedor',
-    'Enviar relatório mensal',
-    'Comprar tinta branca',
-    'Organizar arquivos de 2024',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
@@ -58,14 +51,17 @@ class _TasksScreenState extends State<TasksScreen> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: Text(task, style: AppTheme.bodyText),
+                                child: Text(
+                                  task.description,
+                                  style: AppTheme.bodyText,
+                                ),
                               ),
                               Checkbox(
                                 value: false,
-                                onChanged: (_) {
-                                  setState(() {
-                                    tasks.removeAt(index);
-                                  });
+                                onChanged: (_) async {
+                                  await ref
+                                      .read(taskProvider.notifier)
+                                      .deleteTask(task.id);
                                 },
                               ),
                             ],

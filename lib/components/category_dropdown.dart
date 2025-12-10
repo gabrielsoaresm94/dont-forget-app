@@ -25,7 +25,6 @@ class _CategoryAutocompleteDropdownState
   @override
   void initState() {
     super.initState();
-    // Carrega as categorias uma vez (igual você faz com tasks)
     Future.microtask(() {
       ref.read(categoryProvider.notifier).loadCategories();
     });
@@ -41,7 +40,6 @@ class _CategoryAutocompleteDropdownState
   Widget build(BuildContext context) {
     final categories = ref.watch(categoryProvider);
 
-    // Atualiza o campo quando há seleção (após carregar as categorias)
     if (widget.selectedCategoryId != null && categories.isNotEmpty) {
       final selected = categories.firstWhere(
         (c) => c.id == widget.selectedCategoryId,
@@ -77,7 +75,6 @@ class _CategoryAutocompleteDropdownState
                 },
                 fieldViewBuilder:
                     (context, controller, focusNode, onFieldSubmitted) {
-                      // Mantém o controller interno do Autocomplete sincronizado
                       if (controller.text != _controller.text) {
                         controller.text = _controller.text;
                         controller.selection = TextSelection.fromPosition(
@@ -127,14 +124,10 @@ class _CategoryAutocompleteDropdownState
                 },
               ),
             ),
-
-            // Botão para criar categoria
             _buildSquareButton(
               icon: Icons.check,
               onPressed: () => _createCategory(context),
             ),
-
-            // Botão para editar categoria
             _buildSquareButton(
               icon: Icons.edit,
               onPressed: () => _openEditDialog(context, categories),
@@ -145,7 +138,6 @@ class _CategoryAutocompleteDropdownState
     );
   }
 
-  // --- BOTÃO ESTILIZADO ---
   Widget _buildSquareButton({
     required IconData icon,
     required VoidCallback onPressed,
@@ -163,19 +155,14 @@ class _CategoryAutocompleteDropdownState
     );
   }
 
-  // --- CRIAR CATEGORIA ---
   Future<void> _createCategory(BuildContext context) async {
     final name = _controller.text.trim();
     if (name.isEmpty) return;
-
     try {
       final created = await ref
           .read(categoryProvider.notifier)
           .createCategory(name);
-
-      // Seleciona a categoria recém criada
       widget.onChanged(created.id);
-
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Categoria criada!')));
@@ -186,15 +173,11 @@ class _CategoryAutocompleteDropdownState
     }
   }
 
-  // --- EDITAR / REMOVER CATEGORIA ---
   void _openEditDialog(BuildContext context, List<CategoryModel> categories) {
     final selectedId = widget.selectedCategoryId;
     if (selectedId == null || categories.isEmpty) return;
-
     final category = categories.firstWhere((c) => c.id == selectedId);
-
     final editCtrl = TextEditingController(text: category.name);
-
     showDialog(
       context: context,
       builder: (context) {
@@ -225,7 +208,6 @@ class _CategoryAutocompleteDropdownState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Editar
                     _buildDialogButton(
                       label: "Salvar",
                       color: Colors.greenAccent,
@@ -236,8 +218,6 @@ class _CategoryAutocompleteDropdownState
                         await ref
                             .read(categoryProvider.notifier)
                             .updateCategory(category.id, name);
-
-                        // Se estiver editando a selecionada, sincroniza texto
                         if (widget.selectedCategoryId == category.id) {
                           _controller.text = name;
                         }
@@ -245,8 +225,6 @@ class _CategoryAutocompleteDropdownState
                         Navigator.pop(context);
                       },
                     ),
-
-                    // Remover
                     _buildDialogButton(
                       label: "Remover",
                       color: Colors.redAccent,
@@ -254,8 +232,6 @@ class _CategoryAutocompleteDropdownState
                         await ref
                             .read(categoryProvider.notifier)
                             .deleteCategory(category.id);
-
-                        // Se removeu a selecionada, limpa
                         if (widget.selectedCategoryId == category.id) {
                           widget.onChanged(null);
                           _controller.clear();

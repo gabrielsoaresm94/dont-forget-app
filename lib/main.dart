@@ -1,10 +1,16 @@
+import 'package:dont_forget_app/screens/task.dart';
 import 'package:flutter/material.dart';
 import 'screens/home.dart';
 import 'screens/tasks.dart';
 import 'utils/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,14 +19,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Task Manager',
+      title: 'Dont Forget',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      routes: {
-        '/': (context) => const HomeScreen(),
-        '/tasks': (context) => const TasksScreen(),
-      },
       initialRoute: '/',
+      routes: {
+        '/': (_) => const HomeScreen(),
+        '/tasks': (_) => const TasksScreen(),
+        '/task-detail': (_) => const TaskDetailScreen(),
+      },
     );
   }
 }

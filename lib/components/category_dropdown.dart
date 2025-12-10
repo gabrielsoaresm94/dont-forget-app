@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 
 class CategoryDropdown extends StatelessWidget {
   final String selectedCategory;
@@ -30,8 +30,9 @@ class CategoryDropdown extends StatelessWidget {
                   value: cat,
                   child: Text(
                     cat,
-                    style: GoogleFonts.questrial(
-                      color: const Color(0xFFDEDEDE),
+                    style: const TextStyle(
+                      fontFamily: 'OCRAStd',
+                      color: Color(0xFFDEDEDE),
                       fontSize: 20,
                       letterSpacing: 1,
                     ),

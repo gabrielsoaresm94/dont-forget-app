@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 
 class DateTimePicker extends StatelessWidget {
   final Function(DateTime) onDateSelected;
@@ -19,7 +19,6 @@ class DateTimePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        /// --- SELETOR DE DATA ---
         Expanded(
           child: InkWell(
             onTap: () async {
@@ -53,7 +52,6 @@ class DateTimePicker extends StatelessWidget {
           ),
         ),
 
-        /// --- SELETOR DE HORA ---
         Expanded(
           child: InkWell(
             onTap: () async {
@@ -94,8 +92,9 @@ class DateTimePicker extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: GoogleFonts.questrial(
-          color: const Color(0xFFDEDEDE),
+        style: const TextStyle(
+          fontFamily: 'OCRAStd',
+          color: Color(0xFFDEDEDE),
           fontSize: 20,
         ),
       ),

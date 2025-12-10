@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 import '../components/task_input.dart';
 import '../components/category_dropdown.dart';
 import '../components/date_time_picker.dart';
@@ -44,8 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Text(
                 'NÃO POSSO\nESQUECER DE ...',
-                style: GoogleFonts.questrial(
-                  color: const Color(0xFFDEDEDE),
+                style: const TextStyle(
+                  fontFamily: 'OCRAStd',
+                  color: Color(0xFFDEDEDE),
                   fontSize: 56,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.5,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 
 class TaskInput extends StatelessWidget {
   final TextEditingController controller;
@@ -17,8 +17,9 @@ class TaskInput extends StatelessWidget {
           cursorColor: const Color(0xFFDEDEDE),
           cursorWidth: 4,
           cursorRadius: Radius.zero,
-          style: GoogleFonts.questrial(
-            color: const Color(0xFFDEDEDE),
+          style: const TextStyle(
+            fontFamily: 'OCRAStd',
+            color: Color(0xFFDEDEDE),
             fontSize: 42,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,

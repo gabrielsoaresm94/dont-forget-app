@@ -139,31 +139,12 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                 onTimeSelected: (time) => setState(() => _time = time),
               ),
 
-              const SizedBox(height: 24),
-
               Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Color(0xFFDEDEDE),
-                      size: 32,
-                    ),
-                    onPressed: _updateTask,
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: Color(0xFFDEDEDE),
-                      size: 32,
-                    ),
-                    onPressed: _deleteTask,
-                  ),
+                  _iconButton(Icons.north_west_rounded, _updateTask),
+                  _iconButton(Icons.delete_outline, _deleteTask),
                 ],
               ),
-
-              const Spacer(),
 
               SendButtons(
                 onHome: () => Navigator.pushReplacementNamed(context, '/'),
@@ -172,6 +153,20 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _iconButton(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFDEDEDE)),
+        ),
+        child: Icon(icon, size: 28, color: const Color(0xFFDEDEDE)),
       ),
     );
   }

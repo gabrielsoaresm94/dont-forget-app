@@ -82,25 +82,35 @@ class _CategoryAutocompleteDropdownState
                         );
                       }
 
-                      return TextField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        style: const TextStyle(
-                          fontFamily: 'OCRAStd',
-                          color: Color(0xFFDEDEDE),
-                          fontSize: 20,
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: "Selecione uma categoria",
-                          hintStyle: TextStyle(color: Color(0x55DEDEDE)),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFFDEDEDE)),
+                      return Container(
+                        // constraints: const BoxConstraints(minHeight: 64),
+                        alignment: Alignment.center,
+                        child: TextField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          style: const TextStyle(
+                            fontFamily: 'OCRAStd',
+                            color: Color(0xFFDEDEDE),
+                            fontSize: 20,
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFFDEDEDE)),
+                          decoration: const InputDecoration(
+                            hintText: "Selecione uma categoria",
+                            hintStyle: TextStyle(color: Color(0x55DEDEDE)),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 17,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFFDEDEDE)),
+                              borderRadius: BorderRadius.zero,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFFDEDEDE)),
+                              borderRadius: BorderRadius.zero,
+                            ),
                           ),
+                          onChanged: (text) => _controller.text = text,
                         ),
-                        onChanged: (text) => _controller.text = text,
                       );
                     },
                 optionsViewBuilder: (context, onSelected, options) {
@@ -124,33 +134,24 @@ class _CategoryAutocompleteDropdownState
                 },
               ),
             ),
-            _buildSquareButton(
-              icon: Icons.check,
-              onPressed: () => _createCategory(context),
-            ),
-            _buildSquareButton(
-              icon: Icons.edit,
-              onPressed: () => _openEditDialog(context, categories),
-            ),
+            _iconButton(Icons.check, () => _createCategory(context)),
+            _iconButton(Icons.edit, () => _openEditDialog(context, categories)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildSquareButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      width: 54,
-      height: 54,
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFDEDEDE)),
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: const Color(0xFFDEDEDE)),
-        onPressed: onPressed,
+  Widget _iconButton(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFDEDEDE)),
+        ),
+        child: Icon(icon, size: 28, color: const Color(0xFFDEDEDE)),
       ),
     );
   }

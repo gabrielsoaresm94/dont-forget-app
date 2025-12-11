@@ -1,5 +1,5 @@
+import 'package:dont_forget_app/components/checkbox.dart';
 import 'package:dont_forget_app/components/send_buttons.dart';
-import 'package:dont_forget_app/models/task_model.dart';
 import 'package:dont_forget_app/providers/task_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,41 +31,43 @@ class TasksScreen extends ConsumerWidget {
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 0),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/task',
-                            arguments: task,
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppTheme.borderColor),
-                            borderRadius: BorderRadius.circular(0),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppTheme.borderColor),
+                          borderRadius: BorderRadius.circular(0),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/task',
+                                    arguments: task,
+                                  );
+                                },
                                 child: Text(
                                   task.description,
                                   style: AppTheme.bodyText,
                                 ),
                               ),
-                              Checkbox(
-                                value: false,
-                                onChanged: (_) async {
-                                  await ref
-                                      .read(taskProvider.notifier)
-                                      .deleteTask(task.id);
-                                },
-                              ),
-                            ],
-                          ),
+                            ),
+                            CustomCheckbox(
+                              value: false,
+                              color: AppTheme.textColor,
+                              onTap: () async {
+                                await ref
+                                    .read(taskProvider.notifier)
+                                    .deleteTask(task.id);
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     );

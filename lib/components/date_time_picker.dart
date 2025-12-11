@@ -94,7 +94,7 @@ class DateTimePicker extends StatelessWidget {
         style: const TextStyle(
           fontFamily: 'OCRAStd',
           color: Color(0xFFDEDEDE),
-          fontSize: 20,
+          fontSize: 18,
         ),
       ),
     );

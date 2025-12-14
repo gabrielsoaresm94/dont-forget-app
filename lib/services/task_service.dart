@@ -1,19 +1,17 @@
 import 'package:dio/dio.dart';
+import 'package:dont_forget_app/utils/dio_client.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/task_model.dart';
 
-final taskServiceProvider = Provider((ref) => TaskService());
+final taskServiceProvider = Provider((ref) {
+  final dio = ref.watch(dioProvider);
+  return TaskService(dio);
+});
 
 class TaskService {
-  final _dio = Dio(
-    BaseOptions(
-      baseUrl: 'http://localhost:5000',
-      headers: {
-        "Authorization": "Bearer Token",
-        "Content-Type": "application/json",
-      },
-    ),
-  );
+  final Dio _dio;
+
+  TaskService(this._dio);
 
   Future<TaskModel> getTask(int id) async {
     final res = await _dio.get('/tasks/v1/get/$id');

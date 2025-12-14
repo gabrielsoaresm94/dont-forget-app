@@ -1,3 +1,4 @@
+import 'package:dont_forget_app/providers/category_query_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,10 +25,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _sendTask() async {
     final text = _controller.text.trim();
+
+    debugPrint('text: "${_controller.text}"');
+    debugPrint('category: $_selectedCategoryId');
+    debugPrint('date: $_selectedDate');
+    debugPrint('time: $_selectedTime');
+
     if (text.isEmpty ||
         _selectedCategoryId == null ||
         _selectedDate == null ||
         _selectedTime == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Preencha todos os campos')));
       return;
     }
 
@@ -39,13 +49,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _selectedTime!.minute,
     );
 
-    await ref
-        .read(taskProvider.notifier)
-        .addTask(
-          description: text,
-          categoryId: _selectedCategoryId!,
-          date: fullDate,
-        );
+    try {
+      await ref
+          .read(taskProvider.notifier)
+          .addTask(
+            description: text,
+            categoryId: _selectedCategoryId!,
+            date: fullDate,
+          );
+    } catch (e, s) {
+      debugPrint('Erro ao criar task: $e');
+      debugPrintStack(stackTrace: s);
+    }
 
     _controller.clear();
     Navigator.pushReplacementNamed(context, '/tasks');
@@ -53,7 +68,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final categories = ref.watch(categoryProvider);
+    // final categories = ref.watch(categoryProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF131313),

@@ -11,33 +11,34 @@ final taskProvider = StateNotifierProvider<TaskNotifier, List<TaskModel>>((
 class TaskNotifier extends StateNotifier<List<TaskModel>> {
   final TaskService service;
 
-  TaskNotifier(this.service)
-    : super([
-        TaskModel(
-          id: 1,
-          description: 'Ligar para o fornecedor',
-          expiredAt: DateTime.now().add(const Duration(hours: 2)),
-          categoryId: 1,
-        ),
-        TaskModel(
-          id: 2,
-          description: 'Enviar relatório mensal',
-          expiredAt: DateTime.now().add(const Duration(days: 1)),
-          categoryId: 1,
-        ),
-        TaskModel(
-          id: 3,
-          description: 'Comprar tinta branca',
-          expiredAt: DateTime.now().add(const Duration(days: 2)),
-          categoryId: 1,
-        ),
-        TaskModel(
-          id: 4,
-          description: 'Organizar arquivos de 2024',
-          expiredAt: DateTime.now().add(const Duration(days: 3)),
-          categoryId: 1,
-        ),
-      ]);
+  TaskNotifier(this.service) : super([]);
+
+  // [
+  //     TaskModel(
+  //       id: 1,
+  //       description: 'Ligar para o fornecedor',
+  //       expiredAt: DateTime.now().add(const Duration(hours: 2)),
+  //       categoryId: 1,
+  //     ),
+  //     TaskModel(
+  //       id: 2,
+  //       description: 'Enviar relatório mensal',
+  //       expiredAt: DateTime.now().add(const Duration(days: 1)),
+  //       categoryId: 1,
+  //     ),
+  //     TaskModel(
+  //       id: 3,
+  //       description: 'Comprar tinta branca',
+  //       expiredAt: DateTime.now().add(const Duration(days: 2)),
+  //       categoryId: 1,
+  //     ),
+  //     TaskModel(
+  //       id: 4,
+  //       description: 'Organizar arquivos de 2024',
+  //       expiredAt: DateTime.now().add(const Duration(days: 3)),
+  //       categoryId: 1,
+  //     ),
+  //   ]
 
   Future<void> loadTask(int id) async {
     final task = await service.getTask(id);

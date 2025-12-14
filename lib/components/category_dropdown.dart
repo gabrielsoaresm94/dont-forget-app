@@ -1,5 +1,6 @@
 import 'package:dont_forget_app/models/category_model.dart';
-import 'package:dont_forget_app/providers/category_provider.dart';
+import 'package:dont_forget_app/providers/category_command_provider.dart';
+import 'package:dont_forget_app/providers/category_query_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,128 +22,136 @@ class CategoryAutocompleteDropdown extends ConsumerStatefulWidget {
 class _CategoryAutocompleteDropdownState
     extends ConsumerState<CategoryAutocompleteDropdown> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      ref.read(categoryProvider.notifier).loadCategories();
-    });
-  }
+  CategoryModel? _selected;
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final categories = ref.watch(categoryProvider);
+    final state = ref.watch(categoryQueryProvider);
 
-    if (widget.selectedCategoryId != null && categories.isNotEmpty) {
-      final selected = categories.firstWhere(
+    return state.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(16),
+        child: CircularProgressIndicator(),
+      ),
+      error: (e, _) => const Text(
+        'Erro ao carregar categorias',
+        style: TextStyle(color: Colors.redAccent),
+      ),
+      data: _buildAutocomplete,
+    );
+  }
+
+  Widget _buildAutocomplete(List<CategoryModel> categories) {
+    // sincroniza seleção externa
+    if (widget.selectedCategoryId != null) {
+      _selected = categories.firstWhere(
         (c) => c.id == widget.selectedCategoryId,
-        orElse: () => categories.first,
+        orElse: () => _selected ?? categories.first,
       );
-
-      if (_controller.text != selected.name) {
-        _controller.text = selected.name;
-      }
+      _controller.text = _selected!.name;
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Autocomplete<CategoryModel>(
-                displayStringForOption: (c) => c.name,
-                optionsBuilder: (value) {
-                  if (categories.isEmpty) return const Iterable.empty();
+        Expanded(
+          child: RawAutocomplete<CategoryModel>(
+            textEditingController: _controller,
+            focusNode: _focusNode,
 
-                  if (value.text.isEmpty) return categories;
+            displayStringForOption: (c) => c.name,
 
-                  final query = value.text.toLowerCase();
-                  return categories.where(
-                    (c) => c.name.toLowerCase().contains(query),
-                  );
+            optionsBuilder: (value) {
+              final text = value.text.toLowerCase();
+              if (text.isEmpty) return categories;
+
+              return categories.where(
+                (c) => c.name.toLowerCase().contains(text),
+              );
+            },
+
+            onSelected: (category) {
+              _selected = category;
+              widget.onChanged(category.id);
+            },
+
+            fieldViewBuilder: (context, controller, focusNode, _) {
+              return TextField(
+                controller: controller,
+                focusNode: focusNode,
+                style: const TextStyle(
+                  fontFamily: 'OCRAStd',
+                  color: Color(0xFFDEDEDE),
+                  fontSize: 20,
+                ),
+                decoration: const InputDecoration(
+                  hintText: 'Selecione uma categoria',
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 21,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: Color(0xFFDEDEDE)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.zero,
+                    borderSide: BorderSide(color: Color(0xFFDEDEDE)),
+                  ),
+                ),
+                onChanged: (_) {
+                  _selected = null;
+                  widget.onChanged(null);
                 },
-                onSelected: (category) {
-                  _controller.text = category.name;
-                  widget.onChanged(category.id);
-                },
-                fieldViewBuilder:
-                    (context, controller, focusNode, onFieldSubmitted) {
-                      if (controller.text != _controller.text) {
-                        controller.text = _controller.text;
-                        controller.selection = TextSelection.fromPosition(
-                          TextPosition(offset: controller.text.length),
-                        );
-                      }
+              );
+            },
 
-                      return Container(
-                        // constraints: const BoxConstraints(minHeight: 64),
-                        alignment: Alignment.center,
-                        child: TextField(
-                          controller: controller,
-                          focusNode: focusNode,
-                          style: const TextStyle(
-                            fontFamily: 'OCRAStd',
-                            color: Color(0xFFDEDEDE),
-                            fontSize: 20,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: "Selecione uma categoria",
-                            hintStyle: TextStyle(color: Color(0x55DEDEDE)),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 17,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xFFDEDEDE)),
-                              borderRadius: BorderRadius.zero,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Color(0xFFDEDEDE)),
-                              borderRadius: BorderRadius.zero,
-                            ),
-                          ),
-                          onChanged: (text) => _controller.text = text,
-                        ),
-                      );
-                    },
-                optionsViewBuilder: (context, onSelected, options) {
-                  if (options.isEmpty) return const SizedBox.shrink();
-
-                  return Material(
-                    color: const Color(0xFF1E1E1E),
-                    child: ListView(
+            optionsViewBuilder: (context, onSelected, options) {
+              return Align(
+                alignment: Alignment.topLeft,
+                child: Material(
+                  color: const Color(0xFF1E1E1E),
+                  elevation: 4,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 220),
+                    child: ListView.builder(
                       padding: EdgeInsets.zero,
-                      children: options.map((c) {
+                      itemCount: options.length,
+                      itemBuilder: (context, index) {
+                        final option = options.elementAt(index);
                         return ListTile(
                           title: Text(
-                            c.name,
+                            option.name,
                             style: const TextStyle(color: Colors.white),
                           ),
-                          onTap: () => onSelected(c),
+                          onTap: () => onSelected(option),
                         );
-                      }).toList(),
+                      },
                     ),
-                  );
-                },
-              ),
-            ),
-            _iconButton(Icons.check, () => _createCategory(context)),
-            _iconButton(Icons.edit, () => _openEditDialog(context, categories)),
-          ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        _iconButton(Icons.check, _createCategory),
+        _iconButton(
+          Icons.edit,
+          _selected == null ? null : () => _openEditDialog(context, categories),
         ),
       ],
     );
   }
 
-  Widget _iconButton(IconData icon, VoidCallback onTap) {
+  Widget _iconButton(IconData icon, VoidCallback? onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -151,123 +160,66 @@ class _CategoryAutocompleteDropdownState
         decoration: BoxDecoration(
           border: Border.all(color: const Color(0xFFDEDEDE)),
         ),
-        child: Icon(icon, size: 28, color: const Color(0xFFDEDEDE)),
+        child: Icon(icon, color: const Color(0xFFDEDEDE)),
       ),
     );
   }
 
-  Future<void> _createCategory(BuildContext context) async {
+  Future<void> _createCategory() async {
     final name = _controller.text.trim();
     if (name.isEmpty) return;
-    try {
-      final created = await ref
-          .read(categoryProvider.notifier)
-          .createCategory(name);
-      widget.onChanged(created.id);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Categoria criada!')));
-    } catch (_) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Erro ao criar categoria')));
-    }
+
+    await ref.read(categoryCommandProvider).create(name);
+
+    _controller.clear();
+    widget.onChanged(null);
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Categoria criada')));
   }
 
   void _openEditDialog(BuildContext context, List<CategoryModel> categories) {
-    final selectedId = widget.selectedCategoryId;
-    if (selectedId == null || categories.isEmpty) return;
-    final category = categories.firstWhere((c) => c.id == selectedId);
-    final editCtrl = TextEditingController(text: category.name);
+    if (_selected == null) return;
+
+    final editCtrl = TextEditingController(text: _selected!.name);
+
     showDialog(
       context: context,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: const Color(0xFF1A1A1A),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: editCtrl,
-                  style: const TextStyle(
-                    fontFamily: 'OCRAStd',
-                    color: Color(0xFFDEDEDE),
-                    fontSize: 18,
-                  ),
-                  decoration: const InputDecoration(
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFDEDEDE)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFDEDEDE)),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildDialogButton(
-                      label: "Salvar",
-                      color: Colors.greenAccent,
-                      onPressed: () async {
-                        final name = editCtrl.text.trim();
-                        if (name.isEmpty) return;
-
-                        await ref
-                            .read(categoryProvider.notifier)
-                            .updateCategory(category.id, name);
-                        if (widget.selectedCategoryId == category.id) {
-                          _controller.text = name;
-                        }
-
-                        Navigator.pop(context);
-                      },
-                    ),
-                    _buildDialogButton(
-                      label: "Remover",
-                      color: Colors.redAccent,
-                      onPressed: () async {
-                        await ref
-                            .read(categoryProvider.notifier)
-                            .deleteCategory(category.id);
-                        if (widget.selectedCategoryId == category.id) {
-                          widget.onChanged(null);
-                          _controller.clear();
-                        }
-
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDialogButton({
-    required String label,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      decoration: BoxDecoration(border: Border.all(color: color)),
-      child: TextButton(
-        onPressed: onPressed,
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'OCRAStd',
-            color: Color(0xFFDEDEDE),
-            fontSize: 16,
-          ),
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A1A),
+        content: TextField(
+          controller: editCtrl,
+          style: const TextStyle(color: Color(0xFFDEDEDE)),
         ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              final name = editCtrl.text.trim();
+              if (name.isEmpty) return;
+
+              await ref
+                  .read(categoryCommandProvider)
+                  .update(_selected!.id, name);
+
+              _controller.text = name;
+              Navigator.pop(context);
+            },
+            child: const Text('Salvar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await ref.read(categoryCommandProvider).delete(_selected!.id);
+
+              _controller.clear();
+              widget.onChanged(null);
+              _selected = null;
+
+              Navigator.pop(context);
+            },
+            child: const Text('Remover'),
+          ),
+        ],
       ),
     );
   }

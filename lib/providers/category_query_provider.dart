@@ -18,7 +18,11 @@ class CategoryQueryNotifier
   }
 
   Future<void> load() async {
-    state = const AsyncValue.loading();
+    // Mantém o valor anterior enquanto carrega (não some com o campo do usuário)
+    state = const AsyncValue<List<CategoryModel>>.loading().copyWithPrevious(
+      state,
+    );
+
     try {
       final categories = await service.getCategories();
       state = AsyncValue.data(categories);

@@ -6,34 +6,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final categoryCommandProvider = Provider<CategoryCommand>((ref) {
   return CategoryCommand(
     service: ref.read(categoryServiceProvider),
-    refresh: () => ref.read(categoryQueryProvider.notifier).load(),
+    query: ref.read(categoryQueryProvider.notifier),
   );
 });
 
 class CategoryCommand {
   final CategoryService service;
-  final Future<void> Function() refresh;
+  final CategoryQueryNotifier query;
 
-  CategoryCommand({required this.service, required this.refresh});
+  CategoryCommand({required this.service, required this.query});
 
   Future<void> create(String name) async {
     await service.createCategory(CategoryModel(id: 0, name: name));
-    _eventualRefresh();
+    await _eventualReload();
   }
 
   Future<void> update(int id, String name) async {
     await service.updateCategory(CategoryModel(id: id, name: name));
-    _eventualRefresh();
+    await _eventualReload();
   }
 
   Future<void> delete(int id) async {
     await service.deleteCategory(id);
-    _eventualRefresh();
+    await _eventualReload();
   }
 
-  void _eventualRefresh() async {
-    // respeita consistência eventual
-    await Future.delayed(const Duration(milliseconds: 400));
-    refresh();
+  Future<void> _eventualReload() async {
+    // Consistência eventual: dá um respiro pro read-model se atualizar
+    await Future.delayed(const Duration(milliseconds: 700));
+    await query.load();
   }
 }

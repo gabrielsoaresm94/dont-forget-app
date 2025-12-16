@@ -1,6 +1,7 @@
 import 'package:dont_forget_app/models/category_model.dart';
 import 'package:dont_forget_app/providers/category_command_provider.dart';
 import 'package:dont_forget_app/providers/category_query_provider.dart';
+import 'package:dont_forget_app/services/category_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,109 +36,144 @@ class _CategoryAutocompleteDropdownState
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(categoryQueryProvider);
+    final async = ref.watch(categoryQueryProvider);
+    final categories = async.value ?? const <CategoryModel>[];
 
-    return state.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.all(16),
-        child: CircularProgressIndicator(),
-      ),
-      error: (e, _) => const Text(
-        'Erro ao carregar categorias',
-        style: TextStyle(color: Colors.redAccent),
-      ),
-      data: _buildAutocomplete,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildAutocomplete(categories),
+
+        if (async.isLoading)
+          const Padding(
+            padding: EdgeInsets.only(top: 6),
+            child: LinearProgressIndicator(minHeight: 2),
+          ),
+
+        if (async.hasError)
+          const Padding(
+            padding: EdgeInsets.only(top: 6),
+            child: Text(
+              'Erro ao carregar categorias',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+      ],
     );
   }
 
   Widget _buildAutocomplete(List<CategoryModel> categories) {
-    // sincroniza seleção externa
-    if (widget.selectedCategoryId != null) {
-      _selected = categories.firstWhere(
-        (c) => c.id == widget.selectedCategoryId,
-        orElse: () => _selected ?? categories.first,
-      );
-      _controller.text = _selected!.name;
+    // Sincroniza seleção externa SEM estragar a digitação do usuário
+    if (!_focusNode.hasFocus && widget.selectedCategoryId != null) {
+      final match = categories
+          .where((c) => c.id == widget.selectedCategoryId)
+          .toList();
+
+      if (match.isNotEmpty) {
+        final next = match.first;
+        final shouldUpdateText =
+            _selected?.id != next.id || _controller.text != next.name;
+
+        if (shouldUpdateText) {
+          _selected = next;
+          _controller.text = next.name;
+        }
+      }
     }
 
     return Row(
       children: [
         Expanded(
-          child: RawAutocomplete<CategoryModel>(
-            textEditingController: _controller,
-            focusNode: _focusNode,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return RawAutocomplete<CategoryModel>(
+                textEditingController: _controller,
+                focusNode: _focusNode,
+                displayStringForOption: (c) => c.name,
 
-            displayStringForOption: (c) => c.name,
-
-            optionsBuilder: (value) {
-              final text = value.text.toLowerCase();
-              if (text.isEmpty) return categories;
-
-              return categories.where(
-                (c) => c.name.toLowerCase().contains(text),
-              );
-            },
-
-            onSelected: (category) {
-              _selected = category;
-              widget.onChanged(category.id);
-            },
-
-            fieldViewBuilder: (context, controller, focusNode, _) {
-              return TextField(
-                controller: controller,
-                focusNode: focusNode,
-                style: const TextStyle(
-                  fontFamily: 'OCRAStd',
-                  color: Color(0xFFDEDEDE),
-                  fontSize: 20,
-                ),
-                decoration: const InputDecoration(
-                  hintText: 'Selecione uma categoria',
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 21,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.zero,
-                    borderSide: BorderSide(color: Color(0xFFDEDEDE)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.zero,
-                    borderSide: BorderSide(color: Color(0xFFDEDEDE)),
-                  ),
-                ),
-                onChanged: (_) {
-                  _selected = null;
-                  widget.onChanged(null);
+                optionsBuilder: (value) {
+                  final text = value.text.trim().toLowerCase();
+                  if (text.isEmpty) return categories;
+                  return categories.where(
+                    (c) => c.name.toLowerCase().contains(text),
+                  );
                 },
-              );
-            },
 
-            optionsViewBuilder: (context, onSelected, options) {
-              return Align(
-                alignment: Alignment.topLeft,
-                child: Material(
-                  color: const Color(0xFF1E1E1E),
-                  elevation: 4,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 220),
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: options.length,
-                      itemBuilder: (context, index) {
-                        final option = options.elementAt(index);
-                        return ListTile(
-                          title: Text(
-                            option.name,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          onTap: () => onSelected(option),
-                        );
-                      },
+                onSelected: (category) {
+                  _selected = category;
+                  widget.onChanged(category.id);
+                },
+
+                fieldViewBuilder: (context, controller, focusNode, _) {
+                  return TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    style: const TextStyle(
+                      fontFamily: 'OCRAStd',
+                      color: Color(0xFFDEDEDE),
+                      fontSize: 20,
                     ),
-                  ),
-                ),
+                    decoration: const InputDecoration(
+                      hintText: 'Selecione uma categoria',
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 21,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.zero,
+                        borderSide: BorderSide(color: Color(0xFFDEDEDE)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.zero,
+                        borderSide: BorderSide(color: Color(0xFFDEDEDE)),
+                      ),
+                    ),
+                    onTap: () {
+                      // Força o autocomplete a mostrar opções mesmo sem digitar
+                      controller.value = controller.value.copyWith(
+                        text: controller.text,
+                        selection: TextSelection.collapsed(
+                          offset: controller.text.length,
+                        ),
+                        composing: TextRange.empty,
+                      );
+                    },
+                    onChanged: (_) {
+                      _selected = null;
+                      widget.onChanged(null);
+                    },
+                  );
+                },
+
+                optionsViewBuilder: (context, onSelected, options) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      color: const Color(0xFF1E1E1E),
+                      elevation: 4,
+                      child: SizedBox(
+                        width: constraints.maxWidth,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 220),
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero,
+                            itemCount: options.length,
+                            itemBuilder: (context, index) {
+                              final option = options.elementAt(index);
+                              return ListTile(
+                                title: Text(
+                                  option.name,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                onTap: () => onSelected(option),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -145,7 +181,7 @@ class _CategoryAutocompleteDropdownState
         _iconButton(Icons.check, _createCategory),
         _iconButton(
           Icons.edit,
-          _selected == null ? null : () => _openEditDialog(context, categories),
+          _selected == null ? null : () => _openEditDialog(context),
         ),
       ],
     );
@@ -171,15 +207,60 @@ class _CategoryAutocompleteDropdownState
 
     await ref.read(categoryCommandProvider).create(name);
 
-    _controller.clear();
-    widget.onChanged(null);
+    // Como o command não retorna objeto, esperamos o read-model “enxergar” via GET
+    final created = await _waitForCategoryByName(name);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Categoria criada')));
+    if (!mounted) return;
+
+    if (created != null) {
+      _selected = created;
+      _controller.text = created.name;
+      widget.onChanged(created.id);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Categoria criada e selecionada')),
+      );
+    } else {
+      // Não apareceu a tempo (consistência eventual sendo… ela mesma)
+      widget.onChanged(null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Categoria criada, mas ainda não apareceu na listagem'),
+        ),
+      );
+    }
   }
 
-  void _openEditDialog(BuildContext context, List<CategoryModel> categories) {
+  Future<CategoryModel?> _waitForCategoryByName(String name) async {
+    final service = ref.read(categoryServiceProvider);
+    final target = name.trim().toLowerCase();
+
+    var delay = const Duration(milliseconds: 200);
+
+    for (var i = 0; i < 10; i++) {
+      await Future.delayed(delay);
+
+      try {
+        final list = await service.getCategories();
+        final match = list.where((c) => c.name.trim().toLowerCase() == target);
+        if (match.isNotEmpty) {
+          // Atualiza o query provider também (pra UI inteira ficar consistente)
+          await ref.read(categoryQueryProvider.notifier).load();
+          return match.first;
+        }
+      } catch (_) {
+        // se o query-side falhar, tentamos de novo
+      }
+
+      delay = Duration(milliseconds: (delay.inMilliseconds * 1.35).round());
+    }
+
+    // Mesmo que não tenha achado, pelo menos tentamos refrescar uma vez
+    await ref.read(categoryQueryProvider.notifier).load();
+    return null;
+  }
+
+  void _openEditDialog(BuildContext context) {
     if (_selected == null) return;
 
     final editCtrl = TextEditingController(text: _selected!.name);
@@ -198,18 +279,26 @@ class _CategoryAutocompleteDropdownState
               final name = editCtrl.text.trim();
               if (name.isEmpty) return;
 
-              await ref
-                  .read(categoryCommandProvider)
-                  .update(_selected!.id, name);
+              final id = _selected!.id;
 
+              await ref.read(categoryCommandProvider).update(id, name);
+
+              if (!mounted) return;
+
+              _selected = CategoryModel(id: id, name: name);
               _controller.text = name;
+
               Navigator.pop(context);
             },
             child: const Text('Salvar'),
           ),
           TextButton(
             onPressed: () async {
-              await ref.read(categoryCommandProvider).delete(_selected!.id);
+              final id = _selected!.id;
+
+              await ref.read(categoryCommandProvider).delete(id);
+
+              if (!mounted) return;
 
               _controller.clear();
               widget.onChanged(null);

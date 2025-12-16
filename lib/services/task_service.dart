@@ -15,23 +15,68 @@ class TaskService {
 
   Future<TaskModel> getTask(int id) async {
     final res = await _dio.get('/tasks/v1/get/$id');
-    return TaskModel.fromJson(res.data);
+    final data = res.data;
+
+    if (data is Map && data['Data'] is Map) {
+      return TaskModel.fromJson(Map<String, dynamic>.from(data['Data']));
+    }
+    if (data is Map<String, dynamic>) {
+      return TaskModel.fromJson(data);
+    }
+    if (data is Map && data['data'] is Map) {
+      return TaskModel.fromJson(Map<String, dynamic>.from(data['data']));
+    }
+
+    throw Exception('Resposta inválida em getTask');
   }
 
-  Future<TaskModel> createTask(TaskModel task) async {
-    final res = await _dio.post('/tasks/v1/create', data: task.toJson());
-    return TaskModel.fromJson(res.data);
+  Future<List<TaskModel>> getTasks() async {
+    final res = await _dio.get('/tasks/v1/list');
+    final root = res.data;
+
+    dynamic dataField;
+    if (root is Map) {
+      dataField = root['Data'] ?? root['data'] ?? root['items'];
+    } else {
+      dataField = root;
+    }
+
+    // if (dataField is List) {
+    //   return dataField
+    //       .whereType<Map>()
+    //       .map((t) => TaskModel.fromJson(Map<String, dynamic>.from(t)))
+    //       .toList();
+    // }
+
+    if (dataField is Map) {
+      final out = <TaskModel>[];
+
+      for (final value in dataField.values) {
+        if (value is List) {
+          for (final item in value) {
+            if (item is Map) {
+              out.add(TaskModel.fromJson(Map<String, dynamic>.from(item)));
+            }
+          }
+        }
+      }
+
+      return out;
+    }
+
+    return [];
   }
 
-  Future<TaskModel> updateTask(TaskModel task) async {
-    final res = await _dio.put(
-      '/tasks/v1/update/${task.id}',
-      data: task.toJson(),
-    );
-    return TaskModel.fromJson(res.data);
+  // CQRS: comandos não retornam objeto
+  Future<void> createTask(TaskModel task) async {
+    await _dio.post('/tasks/v1/create', data: task.toJson());
+  }
+
+  Future<void> updateTask(TaskModel task) async {
+    await _dio.put('/tasks/v1/update/${task.id}', data: task.toJson());
   }
 
   Future<void> deleteTask(int id) async {
-    await _dio.delete('/tasks/v1/remove/$id');
+    await _dio.delete('/tasks/v1/delete/$id');
   }
 }

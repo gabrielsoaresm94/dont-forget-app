@@ -5,11 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/app_theme.dart';
 
-class TasksScreen extends ConsumerWidget {
+class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TasksScreen> createState() => _TasksScreenState();
+}
+
+class _TasksScreenState extends ConsumerState<TasksScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(taskProvider.notifier).loadAllWithRetry());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final tasks = ref.watch(taskProvider);
 
     return Scaffold(

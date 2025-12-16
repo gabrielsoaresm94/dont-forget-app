@@ -68,8 +68,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final categories = ref.watch(categoryProvider);
-
     return Scaffold(
       backgroundColor: const Color(0xFF131313),
       body: SafeArea(

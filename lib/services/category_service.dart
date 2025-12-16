@@ -15,17 +15,42 @@ class CategoryService {
 
   Future<CategoryModel> getCategory(int id) async {
     final res = await _dio.get('/categories/v1/get/$id');
-    return CategoryModel.fromJson(res.data);
+    final data = res.data;
+
+    if (data is Map<String, dynamic>) {
+      return CategoryModel.fromJson(data);
+    }
+    if (data is Map && data['data'] is Map) {
+      return CategoryModel.fromJson(Map<String, dynamic>.from(data['data']));
+    }
+
+    throw Exception('Resposta inválida em getCategory');
   }
 
   Future<List<CategoryModel>> getCategories() async {
     final res = await _dio.get('/categories/v1/list');
+    final data = res.data;
 
-    if (res.data is! List) {
+    List rawList;
+
+    if (data is List) {
+      rawList = data;
+    } else if (data is Map && data['data'] is List) {
+      rawList = data['data'] as List;
+    } else if (data is Map && data['items'] is List) {
+      rawList = data['items'] as List;
+    } else if (data is Map && data['categories'] is List) {
+      rawList = data['categories'] as List;
+    } else if (data is Map && data['Data'] is List) {
+      rawList = data['Data'] as List;
+    } else {
       return [];
     }
 
-    return (res.data as List).map((c) => CategoryModel.fromJson(c)).toList();
+    return rawList
+        .whereType<Map>()
+        .map((c) => CategoryModel.fromJson(Map<String, dynamic>.from(c)))
+        .toList();
   }
 
   Future<void> createCategory(CategoryModel category) async {
@@ -40,6 +65,6 @@ class CategoryService {
   }
 
   Future<void> deleteCategory(int id) async {
-    await _dio.delete('/categories/v1/remove/$id');
+    await _dio.delete('/categories/v1/delete/$id');
   }
 }

@@ -130,6 +130,9 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               CategoryAutocompleteDropdown(
                 selectedCategoryId: _categoryId,
                 onChanged: (value) => setState(() => _categoryId = value),
+                onCategoryDeleted: () =>
+                    // Navigator.of(context).popUntil((route) => route.isFirst),
+                    Navigator.pushReplacementNamed(context, '/'),
               ),
 
               DateTimePicker(

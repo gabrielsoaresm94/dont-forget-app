@@ -8,11 +8,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class CategoryAutocompleteDropdown extends ConsumerStatefulWidget {
   final int? selectedCategoryId;
   final ValueChanged<int?> onChanged;
+  final VoidCallback? onCategoryDeleted;
 
   const CategoryAutocompleteDropdown({
     super.key,
     required this.selectedCategoryId,
     required this.onChanged,
+    this.onCategoryDeleted,
   });
 
   @override
@@ -305,6 +307,8 @@ class _CategoryAutocompleteDropdownState
               _selected = null;
 
               Navigator.pop(context);
+
+              widget.onCategoryDeleted?.call();
             },
             child: const Text('Remover'),
           ),

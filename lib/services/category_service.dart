@@ -33,15 +33,7 @@ class CategoryService {
 
     List rawList;
 
-    if (data is List) {
-      rawList = data;
-    } else if (data is Map && data['data'] is List) {
-      rawList = data['data'] as List;
-    } else if (data is Map && data['items'] is List) {
-      rawList = data['items'] as List;
-    } else if (data is Map && data['categories'] is List) {
-      rawList = data['categories'] as List;
-    } else if (data is Map && data['Data'] is List) {
+    if (data is Map && data['Data'] is List) {
       rawList = data['Data'] as List;
     } else {
       return [];

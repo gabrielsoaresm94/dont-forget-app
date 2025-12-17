@@ -13,13 +13,11 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
   final TaskService service;
 
   TaskNotifier(this.service) : super([]) {
-    // carrega automaticamente ao criar o notifier
     Future.microtask(loadAll);
   }
 
   Future<void> loadAll() async {
-    final tasks = await service.getTasks();
-    state = tasks;
+    state = await service.getTasks();
   }
 
   Future<void> loadAllWithRetry({
@@ -30,8 +28,7 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
 
     for (var i = 0; i < attempts; i++) {
       try {
-        final tasks = await service.getTasks();
-        state = tasks;
+        await loadAll();
         return;
       } catch (_) {
         await Future.delayed(delay);
@@ -56,11 +53,7 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
     required int categoryId,
     required DateTime date,
   }) async {
-    // snapshot antes (pra consistência eventual)
-    final before = state;
-    final beforeMaxId = before.isEmpty
-        ? 0
-        : before.map((t) => t.id).reduce(max);
+    final beforeMaxId = state.isEmpty ? 0 : state.map((t) => t.id).reduce(max);
 
     final newTask = TaskModel(
       id: 0,
@@ -69,10 +62,8 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
       categoryId: categoryId,
     );
 
-    // comando (sem retorno)
     await service.createTask(newTask);
 
-    // espera o read-model refletir
     await _waitForNewTask(beforeMaxId: beforeMaxId);
   }
 
@@ -97,8 +88,7 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
       final list = await service.getTasks();
       state = list;
 
-      final hasNew = list.any((t) => t.id > beforeMaxId);
-      if (hasNew) return;
+      if (list.any((t) => t.id > beforeMaxId)) return;
 
       delay = Duration(
         milliseconds: min((delay.inMilliseconds * 1.35).round(), 2000),

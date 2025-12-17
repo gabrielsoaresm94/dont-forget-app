@@ -32,42 +32,22 @@ class TaskService {
 
   Future<List<TaskModel>> getTasks() async {
     final res = await _dio.get('/tasks/v1/list');
-    final root = res.data;
+    final data = res.data;
 
-    dynamic dataField;
-    if (root is Map) {
-      dataField = root['Data'] ?? root['data'] ?? root['items'];
+    List rawList;
+
+    if (data is Map && data['Data'] is List) {
+      rawList = data['Data'] as List;
     } else {
-      dataField = root;
+      return [];
     }
 
-    // if (dataField is List) {
-    //   return dataField
-    //       .whereType<Map>()
-    //       .map((t) => TaskModel.fromJson(Map<String, dynamic>.from(t)))
-    //       .toList();
-    // }
-
-    if (dataField is Map) {
-      final out = <TaskModel>[];
-
-      for (final value in dataField.values) {
-        if (value is List) {
-          for (final item in value) {
-            if (item is Map) {
-              out.add(TaskModel.fromJson(Map<String, dynamic>.from(item)));
-            }
-          }
-        }
-      }
-
-      return out;
-    }
-
-    return [];
+    return rawList
+        .whereType<Map>()
+        .map((e) => TaskModel.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
   }
 
-  // CQRS: comandos não retornam objeto
   Future<void> createTask(TaskModel task) async {
     await _dio.post('/tasks/v1/create', data: task.toJson());
   }

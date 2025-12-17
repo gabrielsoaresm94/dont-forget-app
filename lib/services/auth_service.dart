@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import '../utils/secure_storage.dart';
 
@@ -40,8 +41,8 @@ class AuthService {
 
     final jwt = JWT(
       payload,
-      issuer: "api-gateway",
-      audience: Audience(["client-device"]),
+      issuer: dotenv.env['JWT_ISSUER'] ?? "issuer",
+      audience: Audience([dotenv.env['JWT_AUDIENCE'] ?? "audience"]),
     );
 
     final token = jwt.sign(

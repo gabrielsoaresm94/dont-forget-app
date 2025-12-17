@@ -54,16 +54,13 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
     required DateTime date,
   }) async {
     final beforeMaxId = state.isEmpty ? 0 : state.map((t) => t.id).reduce(max);
-
     final newTask = TaskModel(
       id: 0,
       description: description,
       expiredAt: date,
       categoryId: categoryId,
     );
-
     await service.createTask(newTask);
-
     await _waitForNewTask(beforeMaxId: beforeMaxId);
   }
 
@@ -74,7 +71,6 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
 
   Future<void> deleteTask(int id) async {
     await service.deleteTask(id);
-    // otimismo local + correção eventual
     state = state.where((t) => t.id != id).toList();
     await loadAllWithRetry();
   }

@@ -26,11 +26,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _sendTask() async {
     final text = _controller.text.trim();
 
-    debugPrint('text: "${_controller.text}"');
-    debugPrint('category: $_selectedCategoryId');
-    debugPrint('date: $_selectedDate');
-    debugPrint('time: $_selectedTime');
-
     if (text.isEmpty ||
         _selectedCategoryId == null ||
         _selectedDate == null ||

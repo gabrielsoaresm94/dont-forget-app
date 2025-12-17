@@ -9,15 +9,12 @@ Uma aplicação Flutter (cliente) que busca gerenciar atividades `(tasks)` com d
 
 ## Configuração de Ambiente
 
-O projeto depende de um arquivo `.env` para funcionar corretamente.
+Este serviço depende de um arquivo `.env`.
 
-Crie o arquivo `.env` na raiz do projeto com base no exemplo:
+Crie o arquivo `.env` com base no exemplo:
 
-``` env
-API_BASE_URL=http://localhost:8080
-JWT_SECRET=
-JWT_AUDIENCE=
-JWT_ISSUER=
+``` bash
+cp .env.example .env
 ```
 
 ## Instalação das Dependências

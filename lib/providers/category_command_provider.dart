@@ -12,7 +12,7 @@ final categoryCommandProvider = Provider<CategoryCommand>((ref) {
 
 class CategoryCommand {
   final CategoryService service;
-  final CategoryQueryNotifier query;
+  final CategoryQuery query;
 
   CategoryCommand({required this.service, required this.query});
 
@@ -32,7 +32,6 @@ class CategoryCommand {
   }
 
   Future<void> _eventualReload() async {
-    // Consistência eventual: dá um respiro pro read-model se atualizar
     await Future.delayed(const Duration(milliseconds: 700));
     await query.load();
   }

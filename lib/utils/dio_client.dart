@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
@@ -5,7 +6,7 @@ import '../providers/auth_provider.dart';
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: "http://localhost:5000",
+      baseUrl: dotenv.env['API_BASE_URL'] ?? "http://localhost:5000",
       contentType: "application/json",
     ),
   );

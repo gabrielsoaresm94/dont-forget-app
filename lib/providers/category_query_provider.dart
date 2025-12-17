@@ -4,30 +4,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 final categoryQueryProvider =
-    StateNotifierProvider<
-      CategoryQueryNotifier,
-      AsyncValue<List<CategoryModel>>
-    >((ref) => CategoryQueryNotifier(ref.read(categoryServiceProvider)));
+    StateNotifierProvider<CategoryQuery, AsyncValue<List<CategoryModel>>>(
+      (ref) => CategoryQuery(ref.read(categoryServiceProvider)),
+    );
 
-class CategoryQueryNotifier
-    extends StateNotifier<AsyncValue<List<CategoryModel>>> {
+class CategoryQuery extends StateNotifier<AsyncValue<List<CategoryModel>>> {
   final CategoryService service;
 
-  CategoryQueryNotifier(this.service) : super(const AsyncValue.loading()) {
+  CategoryQuery(this.service) : super(const AsyncValue.loading()) {
     load();
   }
 
   Future<void> load() async {
-    // Mantém o valor anterior enquanto carrega (não some com o campo do usuário)
-    state = const AsyncValue<List<CategoryModel>>.loading().copyWithPrevious(
-      state,
-    );
+    state = const AsyncValue.loading();
 
-    try {
-      final categories = await service.getCategories();
-      state = AsyncValue.data(categories);
-    } catch (e, s) {
-      state = AsyncValue.error(e, s);
-    }
+    state = await AsyncValue.guard(() async {
+      return await service.getCategories();
+    });
   }
 }

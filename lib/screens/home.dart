@@ -1,4 +1,3 @@
-import 'package:dont_forget_app/providers/category_query_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,7 +5,6 @@ import '../components/task_input.dart';
 import '../components/category_dropdown.dart';
 import '../components/date_time_picker.dart';
 import '../components/send_buttons.dart';
-import '../providers/category_provider.dart';
 import '../providers/task_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -56,6 +54,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       debugPrint('Erro ao criar task: $e');
       debugPrintStack(stackTrace: s);
     }
+
+    if (!mounted) return;
 
     _controller.clear();
     Navigator.pushReplacementNamed(context, '/tasks');

@@ -290,6 +290,7 @@ class _CategoryAutocompleteDropdownState
               _selected = CategoryModel(id: id, name: name);
               _controller.text = name;
 
+              if (!context.mounted) return;
               Navigator.pop(context);
             },
             child: const Text('Salvar'),
@@ -306,6 +307,7 @@ class _CategoryAutocompleteDropdownState
               widget.onChanged(null);
               _selected = null;
 
+              if (!context.mounted) return;
               Navigator.pop(context);
 
               widget.onCategoryDeleted?.call();

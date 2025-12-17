@@ -1,16 +1,41 @@
-# dont_forget_app
+# Dont Forget App - Client (Flutter)
 
-A new Flutter project.
+Uma aplicação Flutter (cliente) que busca gerenciar atividades `(tasks)` com descrição, categoria e tempo de expiração afim de auxiliar o usuário com diversas atividades ao longo do calendário. Este projeto faz parte de uma Prova de Conceito (PoC) que explora o padrão **CQRS**, comunicação orientada a eventos e integração com um backend em microsserviços.
 
-## Getting Started
+## Pré-requisitos
 
-This project is a starting point for a Flutter application.
+-   Flutter **LTS**
+-   Dart compatível com a versão do Flutter
 
-A few resources to get you started if this is your first Flutter project:
+## Configuração de Ambiente
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+O projeto depende de um arquivo `.env` para funcionar corretamente.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Crie o arquivo `.env` na raiz do projeto com base no exemplo:
+
+``` env
+API_BASE_URL=http://localhost:8080
+JWT_SECRET=
+JWT_AUDIENCE=
+JWT_ISSUER=
+```
+
+## Instalação das Dependências
+
+Execute o comando abaixo para instalar as dependências do projeto:
+
+``` bash
+flutter pub get
+```
+
+
+## Executando a Aplicação
+
+Para rodar o projeto em ambiente Web:
+
+``` bash
+flutter run -d web-server
+```
+
+Após a execução, o Flutter exibirá a URL local onde a aplicação estará
+disponível.

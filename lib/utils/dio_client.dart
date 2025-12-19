@@ -16,6 +16,7 @@ final dioProvider = Provider<Dio>((ref) {
       onRequest: (req, handler) async {
         final token = await ref.read(bearerTokenProvider.future);
         req.headers["Authorization"] = "Bearer $token";
+        req.headers["ngrok-skip-browser-warning"] = true;
         return handler.next(req);
       },
     ),
